@@ -1,0 +1,39 @@
+# .github/workflows/create-heroku-app.yml
+name: Deploy Branch Changes To Heroku
+on:
+  push:
+    branches:
+      - master
+      - staging
+
+jobs:
+  heroku-pull-request:
+    runs-on: ubuntu-latest
+    env:
+      HEROKU_MASTER_APP_NAME: calendar-app
+      HEROKU_STAGING_APP_NAME: calendar-app-dev
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref_name }}
+
+      - name: Login to Heroku
+        uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_email: ${{ secrets.HEROKU_USER_EMAIL }}
+          heroku_app_name: github.ref_name == 'master' && ${{ env.HEROKU_MASTER_APP_NAME }} || ${{ env.HEROKU_STAGING_APP_NAME }}
+          justlogin: true
+
+      - name: Add Heroku remote for master
+        if: github.ref_name == 'master'
+        run: heroku git:remote --app=${{ env.HEROKU_MASTER_APP_NAME  }}
+
+      - name: Add Heroku remote for staging
+        if: github.ref_name == 'staging'
+        run: heroku git:remote --app=${{ env.HEROKU_STAGING_APP_NAME  }}
+
+      - name: Push to app on Heroku
+        run: git push heroku ${{ github.ref_name }}:master --force
