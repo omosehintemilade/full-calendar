@@ -1,8 +1,7 @@
 import React, { Children } from "react";
-import { closeModal, toggleModal } from "./helpers";
 import "./index.css";
 
-export default function Modal({ children }) {
+export function Modal({ children }) {
   return (
     <div
       className="modal"
@@ -23,3 +22,15 @@ export default function Modal({ children }) {
     </div>
   );
 }
+
+export const openModal = () => {
+  // Working with raw el here so as to avoid props drilling for modal state
+  const modalEl = document.querySelector(".modal");
+  modalEl.classList.add("modal-open");
+};
+
+export const closeModal = () => {
+  // Working with raw el here so as to avoid props drilling for modal state
+  const modalEl = document.querySelector(".modal");
+  modalEl.classList.remove("modal-open");
+};
